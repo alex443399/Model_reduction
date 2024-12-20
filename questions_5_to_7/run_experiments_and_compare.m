@@ -1,4 +1,4 @@
-function [comparisons, relative_errors] = run_experiments_and_compare( ...
+function [comparisons, norms_for_normalizing] = run_experiments_and_compare( ...
     physical_data,geo_data,experiment_data,K_list,L_list)
     % given Ks and Ls, the comparisons are made with respect to the last
     % ones, which we assume are the largest K, L
@@ -48,8 +48,6 @@ function [comparisons, relative_errors] = run_experiments_and_compare( ...
         end
         disp('Comparing with (K,L) = (' + string(K_list(expe)) + ',' + string(L_list(expe)) + ')')
     end
-    % Normalizing
-    relative_errors = comparisons/norms_for_normalizing;
 
 end
 
@@ -89,11 +87,11 @@ function error_sq = get_error_sq_from_matrices(large_A, current_A, K_expe, L_exp
     % but not in the smaller one. To do this we compute the frobenius norm
     % of the larg matrix and substract the submatrix that overlaps with the
     % other
-    higher_order_terms_error = norm(large_A, 'fro')...
-        - norm(submatrix_of_large_matrix, 'fro');
+    higher_order_terms_error_squared = norm(large_A, 'fro').^2 ...
+        - norm(submatrix_of_large_matrix, 'fro').^2;
     % For the shared terms, we substract them and take the norm
     lower_order_terms_error = norm(submatrix_of_large_matrix-current_A, 'fro');
     % We add the errors
-    error_sq = lower_order_terms_error^2 + higher_order_terms_error^2;
+    error_sq = lower_order_terms_error^2 + higher_order_terms_error_squared;
     
 end

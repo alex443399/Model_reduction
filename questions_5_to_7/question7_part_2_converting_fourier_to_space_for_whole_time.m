@@ -30,4 +30,4 @@ for n = 0:K
 end
 
 %% We plot to verify
-mesh(reshape(T(100,:,:),[100,100]));
+mesh(x_values,y_values,reshape(T(300,:,:),[100,100]));

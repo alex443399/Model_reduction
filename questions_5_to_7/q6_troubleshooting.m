@@ -53,13 +53,13 @@
 % %%
 % plot(b_1(:,6)-b_singleton)
 %% Isolating the error
-t_span = linspace(0,600,1817);
+t_span = 0:0.1:10;
 
-coefs = [-1.4023; -0.7648];
-initial_conditions = [8; -12];
+coefs = [-1; -2];
+initial_conditions = [1; 1];
 
 
 [~, b_2] = ode45(@(t,a) coefs.*a, t_span, initial_conditions);
-[~, b_1] = ode45(@(t,a) coefs(1) .* a, t_span, initial_conditions(1));
+[~, b_1] = ode45(@(t,a) coefs(1) * a, t_span, initial_conditions(1));
 
 max(abs((b_2(:,1)-b_1)))
