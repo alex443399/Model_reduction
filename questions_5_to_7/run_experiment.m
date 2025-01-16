@@ -14,8 +14,8 @@ function [A_result, t_result] = run_experiment( ...
     end
 
     if strcmp(experiment_data.u_functions,'Sines')
-        u1_function = @(t) 0.01 * sin(t/50);
-        u2_function = @(t) -0.01 * sin(t/50);
+        u1_function = @(t) 1e5 * sin(t/50);
+        u2_function = @(t) -1e5 * sin(t/50);
     elseif strcmp(experiment_data.u_functions, 'Zero')
         u1_function = @(t) 0;
         u2_function = @(t) 0;

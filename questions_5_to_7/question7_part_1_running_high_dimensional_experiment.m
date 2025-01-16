@@ -24,11 +24,11 @@ L = 16;
 %% We plot it
 graph_for_time = @(t) plot_mesh_experiment(physical_data.Lx, physical_data.Ly, A_High_dim, ...
     t_High_dim, t, 100);
-Delta_t = 10;
+Delta_t = 15;
 
 figure;
-for i = 1:6
-    subplot(2,3,i);
+for i = 1:15
+    subplot(3,5,i);
     graph_for_time(Delta_t*(i-1));
     hold on
 end

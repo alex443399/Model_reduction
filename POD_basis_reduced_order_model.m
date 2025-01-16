@@ -15,8 +15,8 @@ C_matrix_of_inner_products_with_input = inner_products_with_input_indicators(bas
 a0 = get_jump_initial_conditions_in_reduced_basis(basis_in_matrix_form, ...
     R_reduced_model_order, resolution, physical_data, hX, hY, x_values, y_values);
 %% Simulation
-u1_function = @(t) 0.01 * sin(t/50);
-u2_function = @(t) -0.01 * sin(t/50);
+u1_function = @(t) 1e5 * sin(t/50);
+u2_function = @(t) -1e5 * sin(t/50);
 
 
 f_R = @(t,a) (physical_data.kappa * B_matrix_of_inner_products_with_laplacian * a + ...
@@ -24,31 +24,40 @@ f_R = @(t,a) (physical_data.kappa * B_matrix_of_inner_products_with_laplacian * 
 
 % 0.01 * sin(t/50)
 [time_steps_reduced_order_model, A_result_reduced_order_model] = ode45( ...
-    @(t,a) f_R(t,a), [0 600], a0);
-
+    @(t,a) f_R(t,a), t_High_dim, a0);
+%% Plot evolution
 plot(A_result_reduced_order_model)
+%% Plot errors
+plot(A_result_reduced_order_model - T_data_matrix' * basis_in_vector_form * hX * hY)
 %% Plotting
 axis_data = [0, physical_data.Lx, 0, physical_data.Ly, 0, 1];
-desired_times_in_seconds= [0, 10, 20, 30, 40, 50];
 figure;
-for i = 1:length(desired_times_in_seconds)
-    subplot(2,3,i);
-    [~ , t_index] = min(abs(time_steps_reduced_order_model-desired_times_in_seconds(i)));
+for i = 1:15
+    subplot(3,5,i);
+    desired_times_in_seconds = 15*(i-1);
+    [~ , t_index] = min(abs(time_steps_reduced_order_model-desired_times_in_seconds));
     T_at_time = reduced_basis_to_spatial( ...
-        A_result_reduced_order_model(t_index, :), basis_in_matrix_form, resolution);
+        A_result_reduced_order_model(t_index, :), basis_in_matrix_form);
     
     
     mesh(x_values, y_values, T_at_time');
-    title('The temperature distribution at time ' + string(time_steps_reduced_order_model(t_index)) + 's')
+    title('The temperature t=' + string(time_steps_reduced_order_model(t_index)) + 's')
     xlabel('x')
     ylabel('y')
     zlabel('T')
-    axis(axis_data)
+%     axis(axis_data)
     hold on
 end
 hold off
-%%
-plot(A_result_reduced_order_model)
+%% Measuring error
+error_array = zeros(1, time_steps);
+for t=1:time_steps
+    t
+    difference = reduced_basis_to_spatial(A_result_reduced_order_model(t,:), basis_in_matrix_form)-T(t,:,:);
+    error_array(t) = sum(difference.^2,'all') * hX * hY;
+end
+%% Plotting error
+plot(error_array)
 %% implement reduced order model
 function dadt = a_coefficients(t, a, k, c, p, R, u)
     dadt = zeros(R,1);
@@ -155,8 +164,8 @@ function a0 = get_jump_initial_conditions_in_reduced_basis(basis_in_matrix_form,
     end
 end
 
-function T_profile = reduced_basis_to_spatial(a, basis_in_matrix_form, resolution)
-    T_profile = zeros(resolution);
+function T_profile = reduced_basis_to_spatial(a, basis_in_matrix_form)
+    T_profile = zeros(size(squeeze(basis_in_matrix_form(1,:,:))));
     R = length(a);
     for r = 1:R
         T_profile = T_profile + a(r) * squeeze(basis_in_matrix_form(r,:,:));
