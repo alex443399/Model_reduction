@@ -46,8 +46,9 @@ function [A_result, t_result] = run_experiment_given_initial_conditions( ...
     
     
     % Contributions of each input to the fourier coefficients
-    u_1_contributions_to_A_matrix = contribution_single_input_2D(K,L,X1,Y1,W,Lx,Ly);
-    u_2_contributions_to_A_matrix = contribution_single_input_2D(K,L,X2,Y2,W,Lx,Ly);
+    u_scaling_constant = physical_data.rho*physical_data.c;
+    u_1_contributions_to_A_matrix = contribution_single_input_2D(K,L,X1,Y1,W,Lx,Ly)/u_scaling_constant;
+    u_2_contributions_to_A_matrix = contribution_single_input_2D(K,L,X2,Y2,W,Lx,Ly)/u_scaling_constant;
     
     u_1_contributions_to_a_vector = reshape( ...
         u_1_contributions_to_A_matrix, [(K+1)*(L+1),1]);

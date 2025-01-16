@@ -13,8 +13,8 @@ ylabel("\sigma_i")
 % This is how much percent of energy we want to keep. I chose 1-1e-6
 % because that is roughly the noise level for numerical noise. Based on
 % that tolerance we compute R.
-
 Target_energy = 1e-6;
+
 cummulative_energy = cumsum(singular_values.^2);
 percent_of_energy_missing = 1 - cummulative_energy/cummulative_energy(end);
 
@@ -46,6 +46,10 @@ for i = 1:6
     hold on
 end
 hold off
+%% Veryfying contributions
+
+plot(T_data_matrix' * basis_in_vector_form * hX * hY)
+legend()
 %% Veryfying axes
 % Truncated_coeffs = Sigma(1:R_reduced_model_order, 1:R_reduced_model_order) * U(1:1,1:R_reduced_model_order)';
 % size(Truncated_coeffs)

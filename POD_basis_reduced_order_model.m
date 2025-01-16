@@ -3,7 +3,7 @@
 hX = physical_data.Lx/(resolution-1);
 hY = physical_data.Ly/(resolution-1);
 
-B_matrix_of_inner_products_with_laplacian = inner_products_with_laplacians(basis_in_matrix_form ...
+B_matrix_of_inner_products_with_laplacian = inner_products_between_gradients(basis_in_matrix_form ...
     , R_reduced_model_order, hX, hY);
 % Setting up the matrix for the inputs
 
@@ -19,23 +19,27 @@ u1_function = @(t) 0.01 * sin(t/50);
 u2_function = @(t) -0.01 * sin(t/50);
 
 
-f_R = @(t,a) (physical_data.kappa * B_matrix_of_inner_products_with_laplacian * a + C_matrix_of_inner_products_with_input * [u1_function(t); u2_function(t)])/physical_data.rho / physical_data.c; 
+f_R = @(t,a) (physical_data.kappa * B_matrix_of_inner_products_with_laplacian * a + ...
+    C_matrix_of_inner_products_with_input * [u1_function(t); u2_function(t)])/physical_data.rho / physical_data.c; 
 
-[time_steps, A_result_reduced_order_model] = ode45( ...
+% 0.01 * sin(t/50)
+[time_steps_reduced_order_model, A_result_reduced_order_model] = ode45( ...
     @(t,a) f_R(t,a), [0 600], a0);
+
+plot(A_result_reduced_order_model)
 %% Plotting
 axis_data = [0, physical_data.Lx, 0, physical_data.Ly, 0, 1];
 desired_times_in_seconds= [0, 10, 20, 30, 40, 50];
 figure;
 for i = 1:length(desired_times_in_seconds)
     subplot(2,3,i);
-    [~ , t_index] = min(abs(time_steps-desired_times_in_seconds(i)));
+    [~ , t_index] = min(abs(time_steps_reduced_order_model-desired_times_in_seconds(i)));
     T_at_time = reduced_basis_to_spatial( ...
         A_result_reduced_order_model(t_index, :), basis_in_matrix_form, resolution);
     
     
     mesh(x_values, y_values, T_at_time');
-    title('The temperature distribution at time ' + string(time_steps(t_index)) + 's')
+    title('The temperature distribution at time ' + string(time_steps_reduced_order_model(t_index)) + 's')
     xlabel('x')
     ylabel('y')
     zlabel('T')
@@ -45,7 +49,6 @@ end
 hold off
 %%
 plot(A_result_reduced_order_model)
-
 %% implement reduced order model
 function dadt = a_coefficients(t, a, k, c, p, R, u)
     dadt = zeros(R,1);
@@ -71,6 +74,20 @@ function matrix = inner_products_with_laplacians(basis_in_matrix_form, R, DeltaX
             lapl_phi_j = del2(phi_j, DeltaX, DeltaY);
             % Inner product
             matrix(i,j) = Inner_Product(phi_i, lapl_phi_j, DeltaX, DeltaY);
+        end
+    end
+end
+
+function matrix = inner_products_between_gradients(basis_in_matrix_form, R, DeltaX, DeltaY)
+    matrix = zeros(R);
+    for i = 1:R
+        phi_i = squeeze(basis_in_matrix_form(i,:,:));
+        [grad_ix, grad_iy] = gradient(phi_i, DeltaX, DeltaY);
+        for j = 1:R
+            phi_j = squeeze(basis_in_matrix_form(j,:,:));
+            [grad_jx, grad_jy] = gradient(phi_j, DeltaX, DeltaY);
+            % We compute the inner products
+            matrix(i,j) = -sum(grad_ix.*grad_jx + grad_iy.* grad_jy, 'all') * DeltaX * DeltaY;
         end
     end
 end
