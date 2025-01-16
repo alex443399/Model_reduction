@@ -50,7 +50,20 @@ for i = 1:15
 end
 hold off
 %% Measuring error
-error_array = zeros(1, time_ste)
+error_array = zeros(1, time_steps);
+for t=1:time_steps
+    t
+    difference = reduced_basis_to_spatial(A_result_reduced_order_model(t,:), basis_in_matrix_form)-T(t,:,:);
+    error_array(t) = sum(difference.^2,'all') * hX * hY;
+end
+%% Plotting error
+plot(error_array)
+%%
+sum(reduced_basis_to_spatial(Da, basis_in_matrix_form).^2,'all') *hX*hY
+sum((reduced_basis_to_spatial(a0, basis_in_matrix_form) - ...
+    reduced_basis_to_spatial(T_data_matrix(:,1)' * basis_in_vector_form * hX*hY, basis_in_matrix_form)).^2,'all') *hX*hY
+sum((reduced_basis_to_spatial(a0, basis_in_matrix_form) - ...
+    reduced_basis_to_spatial(T_data_matrix(:,1)' * basis_in_vector_form * hX*hY, basis_in_matrix_form)).^2,'all') *hX*hY
 
 %% implement reduced order model
 function dadt = a_coefficients(t, a, k, c, p, R, u)
@@ -159,7 +172,7 @@ function a0 = get_jump_initial_conditions_in_reduced_basis(basis_in_matrix_form,
 end
 
 function T_profile = reduced_basis_to_spatial(a, basis_in_matrix_form)
-    T_profile = zeros(size(a));
+    T_profile = zeros(size(squeeze(basis_in_matrix_form(1,:,:))));
     R = length(a);
     for r = 1:R
         T_profile = T_profile + a(r) * squeeze(basis_in_matrix_form(r,:,:));
