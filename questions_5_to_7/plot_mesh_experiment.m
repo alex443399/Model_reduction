@@ -27,7 +27,7 @@ function plot_mesh_experiment(Lx, Ly, A_result, t_result, simulation_time_in_sec
         resolution_mesh_grids);
     
     % And we graph it
-    mesh(x_result_sample, y_result_sample, T_result_sample)
+    mesh(x_result_sample, y_result_sample, T_result_sample')
     axis(axis_data)
     title('Simulation at t=' + string(t_result(t_sample))+ 's')
     xlabel('x');

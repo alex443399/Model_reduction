@@ -1,11 +1,13 @@
 function [A_result, t_result] = run_experiment( ...
     physical_data,geo_data, experiment_data, K, L, t_span)
     
-    if strcmp(experiment_data.Initial_conditions,'Jump')
-        A0 = jump_initial_conditions(K,L,physical_data.Lx,physical_data.Ly);
-    elseif strcmp(experiment_data.Initial_conditions, 'Cubic')
+    if strcmp(experiment_data.Initial_conditions,'Cubic')
         A0 = cubic_initial_conditions(K,L,physical_data.Lx,physical_data.Ly);
+    elseif strcmp(experiment_data.Initial_conditions, 'Jump')
+
+        A0 = jump_initial_conditions(K,L,physical_data.Lx,physical_data.Ly);
     elseif strcmp(experiment_data.Initial_conditions, 'Zero')
+
         A0 = zeros(k,L);
     else
         assert(False, 'Unknown initial conditions')

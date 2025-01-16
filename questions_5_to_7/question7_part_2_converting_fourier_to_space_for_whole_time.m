@@ -30,4 +30,6 @@ for n = 0:K
 end
 
 %% We plot to verify
-mesh(x_values,y_values,reshape(T(300,:,:),[100,100]));
+mesh(x_values,y_values,squeeze(T(1000,:,:))');
+xlabel('x')
+ylabel('y')

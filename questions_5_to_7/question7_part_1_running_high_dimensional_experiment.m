@@ -21,7 +21,18 @@ L = 16;
 
 %% We run the experiment in high dimensions.
 [A_High_dim, t_High_dim] = run_experiment(physical_data,geo_data, experiment_data, K, L, [0 60*10]);
+%% We plot it
+graph_for_time = @(t) plot_mesh_experiment(physical_data.Lx, physical_data.Ly, A_High_dim, ...
+    t_High_dim, t, 100);
+Delta_t = 10;
 
+figure;
+for i = 1:6
+    subplot(2,3,i);
+    graph_for_time(Delta_t*(i-1));
+    hold on
+end
+hold off
 %% UNUSED, too much memory space, ~ 200kx64x64
 % %% Run experiment to obtain the step size
 % t_span_for_finding_Dt = [0 60*10]; % 10 mins = 10*60s
