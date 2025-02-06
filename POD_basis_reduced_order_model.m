@@ -3,7 +3,7 @@
 hX = physical_data.Lx/(resolution-1);
 hY = physical_data.Ly/(resolution-1);
 
-B_matrix_of_inner_products_with_laplacian = inner_products_between_gradients(basis_in_matrix_form ...
+B_matrix_of_inner_products_with_laplacian = inner_products_with_laplacians(basis_in_matrix_form ...
     , R_reduced_model_order, hX, hY);
 % Setting up the matrix for the inputs
 
@@ -28,7 +28,14 @@ f_R = @(t,a) (physical_data.kappa * B_matrix_of_inner_products_with_laplacian * 
 %% Plot evolution
 plot(A_result_reduced_order_model)
 %% Plot errors
-plot(A_result_reduced_order_model - T_data_matrix' * basis_in_vector_form * hX * hY)
+projected_error = A_result_reduced_order_model - T_data_matrix' * basis_in_vector_form * hX * hY;
+plot(time_steps_reduced_order_model, projected_error)
+%% Total J vs t
+plot(time_steps_reduced_order_model, vecnorm(projected_error'))
+%%
+total_energy_simulation_squared = sum(A_result_reduced_order_model.^2,'all');
+total_energy_error = sum(projected_error.^2,'all');
+relative_error = sqrt(total_energy_error/total_energy_simulation_squared)
 %% Plotting
 axis_data = [0, physical_data.Lx, 0, physical_data.Ly, 0, 1];
 figure;

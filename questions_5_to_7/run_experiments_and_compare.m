@@ -39,8 +39,8 @@ function [comparisons, norms_for_normalizing] = run_experiments_and_compare( ...
         % Find error for each time step
         for t_step = 1:number_of_steps
             % Reshape the tensors to matrices
-            large_A = reshape(A_result_last(t_step,:,:),[K_list(end)+1,L_list(end)+1]);
-            current_A = reshape(A_result_expe(t_step,:,:),[K_expe+1,L_expe+1]);
+            large_A = squeeze(A_result_last(t_step,:,:));
+            current_A = squeeze(A_result_expe(t_step,:,:));
             
             % Get the error and the norm
             error_expe_t = sqrt(get_error_sq_from_matrices(large_A, current_A, K_expe, L_expe));

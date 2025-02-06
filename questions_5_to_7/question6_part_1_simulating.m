@@ -19,8 +19,8 @@ experiment_data.Initial_conditions = Initial_conditions; % It has to be in ['Jum
 experiment_data.u_functions = Input_functions; % It has to be in ['Sines', 'Zero']
 %% Run experiment
 % Chosing model size 
-K = 10;
-L = 10;
+K = 3;
+L = 3;
 
 t_span = [0 60*10]; % 10 mins = 10*60s
 [A_result, t_result] = run_experiment(physical_data,geo_data, experiment_data, K, L, t_span);
@@ -28,7 +28,7 @@ t_span = [0 60*10]; % 10 mins = 10*60s
 % We plot the resulting function at many points in time
 graph_for_time = @(t) plot_mesh_experiment(physical_data.Lx, physical_data.Ly, A_result, ...
     t_result, t, 100);
-Delta_t = 10;
+Delta_t = 60;
 
 figure;
 for i = 1:6
