@@ -1,11 +1,12 @@
-R = 10;
+R = 3;
+%%
 experiment_data.Initial_conditions = 'Jump'; % It has to be in ['Jump', 'Cubic', 'Zero]
-experiment_data.u_functions = 'Zero'; % It has to be in ['Sines', 'Zero']
+experiment_data.u_functions = 'Sines'; % It has to be in ['Sines', 'Zero']
 
-%% Load basis
-basis_in_matrix_form = load('full_basis_in_matrix_form.mat').full_basis_in_matrix_form;
+% Load basis
+basis_in_matrix_form = load('full_100_v3_basis_in_matrix_form.mat').full_basis_in_matrix_form;
 basis_in_matrix_form = basis_in_matrix_form(1:R, :, :);
-%% Variables
+% Variables
 resolution = size(basis_in_matrix_form, 2);
 
 %% Data
@@ -22,49 +23,65 @@ geo_data.Y1 = physical_data.Ly/2;
 geo_data.X2 = 3*physical_data.Lx/4;
 geo_data.Y2 = physical_data.Ly/2;
 geo_data.W = 0.05;
+%% Simulation HDM
+K = 16;
+L = 16;
+[A_High_dim, t_High_dim] = run_experiment(physical_data,geo_data, experiment_data, K, L, [0 60*10]);
+%% Convert HDM
+Jumps = 50;
+HDM_TEMP = get_data_tensor(A_High_dim, t_High_dim, physical_data, ...
+    resolution, Jumps);
+
 %% Calling reduced order model
 % setting up the matrix of inner products with laplacians of phi
 [ROM_state_matrix, ROM_input_matrix] = ROM_model_from_basis(basis_in_matrix_form, ...
     physical_data, geo_data);
 
 a0 = reduced_initial_conditions(basis_in_matrix_form, physical_data, experiment_data);
+% HDM_MESH_T0 = squeeze(HDM_TEMP(1,:,:));
+% a0_THDM = Initial_conditions_given_mesh(basis_in_matrix_form, HDM_MESH_T0, ...
+%      physical_data.Lx/(resolution-1), physical_data.Ly/(resolution-1));
 u_rom = get_u_function(experiment_data);
-%% Simulation HDM
-K = 16;
-L = 16;
-[A_High_dim, t_High_dim] = run_experiment(physical_data,geo_data, experiment_data, K, L, [0 60*10]);
-%% Simulating ROM
-f_R = @(t,a) ROM_state_matrix * a + ROM_input_matrix * u_rom(t);
-[t_ROM, a_ROM] = ode45( ...
-    @(t,a) f_R(t,a), t_High_dim, a0);
-%% Convert HDM
-HDM_TEMP = convert_from_fourier_to_data_tensor(A_High_dim, resolution, physical_data);
 %%
-ROM_TEMP = convert_ROM_to_data_tensor(a_ROM, basis_in_matrix_form);
+% Simulating ROM
+[~, a_ROM] = ode45(@(t,a) ROM_state_matrix * a + ROM_input_matrix * u_rom(t), ...
+    t_High_dim, a0);
+% Mesh
+ROM_TEMP = convert_ROM_to_data_tensor(a_ROM, basis_in_matrix_form, Jumps);
 %% Comparing meshes
+dA = physical_data.Lx * physical_data.Ly /(resolution-1)^2;
 DELTA_TEMP = HDM_TEMP - ROM_TEMP;
-Error_energy = sum(DELTA_TEMP.^2, [2,3]);
-Original_energy = sum(HDM_TEMP.^2, [2,3]);
-error_relative = Error_energy./Original_energy;
-plot(error_relative)
+Error_energy = sum(DELTA_TEMP.^2, [2,3])*dA;
+Original_energy = sum(HDM_TEMP.^2, [2,3])*dA;
+error_relative = sqrt(sum(Error_energy)/sum(Original_energy))
+plot(Error_energy)
 %% Plot
 figure;
 subplot(1,2,1);
-mesh(x_values, y_values, squeeze(HDM_TEMP(200,:,:))');
+mesh(squeeze(HDM_TEMP(2,:,:))');
+xlabel('x')
+ylabel('y')
+title('HDM')
 subplot(1,2,2);
-mesh(x_values, y_values, squeeze(ROM_TEMP(200,:,:))');
+mesh(squeeze(ROM_TEMP(2,:,:))');
+xlabel('x')
+ylabel('y')
+title('ROM')
 %%
 plot(t_High_dim, sum(DELTA_TEMP.^2,[2,3]))
 
 %% Functions
-function T_ROM = convert_ROM_to_data_tensor(a_ROM, basis_in_matrix_form)
-    t_size = size(a_ROM,1);
+function T_ROM = convert_ROM_to_data_tensor(a_ROM, basis_in_matrix_form, Jumps)
+    sampled_time_steps = length(1:Jumps:size(a_ROM,1));
+    
     resolution = size(basis_in_matrix_form, 2);
-    T_ROM = zeros(t_size, resolution, resolution);
-    for t = 1:t_size
-        a_t = a_ROM(t,:)';
+    T_ROM = zeros(sampled_time_steps, resolution, resolution);
+
+    for t_sample = 1:sampled_time_steps
+        t_sim = 1 + (t_sample-1) * Jumps;
+        a_t = a_ROM(t_sim,:)';
         product = sum(a_t.*basis_in_matrix_form);
-        T_ROM(t,:,:) = product;
+        T_ROM(t_sample,:,:) = product;
     end
 end
 function a0 = Initial_conditions_given_mesh(basis_in_matrix_form, T0, hX, hY)

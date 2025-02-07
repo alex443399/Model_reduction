@@ -5,8 +5,8 @@ function [A_state_matrix, B_input_matrix] = ROM_model_from_basis(basis_in_matrix
     
     hX = physical_data.Lx/(resolution-1);
     hY = physical_data.Ly/(resolution-1);
-    
-    A_state_matrix_base = inner_products_with_laplacians(basis_in_matrix_form, hX, hY);
+    % inner_products_between_gradients vs inner_products_with_laplacians
+    A_state_matrix_base = inner_products_between_gradients(basis_in_matrix_form, hX, hY);
     B_input_matrix_base = inner_products_with_input_indicators(basis_in_matrix_form, ...
     geo_data, hX, hY, physical_data);
 
@@ -65,6 +65,21 @@ function input_matrix_pre = inner_products_with_input_indicators(basis_in_matrix
         end
     end
  
+end
+
+function matrix = inner_products_between_gradients(basis_in_matrix_form, DeltaX, DeltaY)
+    R = size(basis_in_matrix_form, 1);
+    matrix = zeros(R);
+    for i = 1:R
+        phi_i = squeeze(basis_in_matrix_form(i,:,:));
+        [grad_ix, grad_iy] = gradient(phi_i, DeltaX, DeltaY);
+        for j = 1:R
+            phi_j = squeeze(basis_in_matrix_form(j,:,:));
+            [grad_jx, grad_jy] = gradient(phi_j, DeltaX, DeltaY);
+            % We compute the inner products
+            matrix(i,j) = -sum(grad_ix.*grad_jx + grad_iy.* grad_jy, 'all') * DeltaX * DeltaY;
+        end
+    end
 end
 
 

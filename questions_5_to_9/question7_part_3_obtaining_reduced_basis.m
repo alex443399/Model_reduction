@@ -1,8 +1,9 @@
 %% We first write T as a matrix to compute SVD
-T_data_matrix = reshape(T, [time_steps, resolution^2])';
+time_samples = size(T,1);
+T_data_matrix = reshape(T, [time_samples, resolution^2])';
 disp(['N > M: ', num2str(length(T_data_matrix)>length(T_data_matrix(1,:)))])
 %% We compute scd
-[Y, Sigma, U] = svd(T_data_matrix);
+[Y, Sigma, U] = svd(T_data_matrix, "econ");
 %% We plot the singular values to observe
 singular_values = diag(Sigma);
 loglog(singular_values)
@@ -37,14 +38,14 @@ full_basis_in_vector_form = Y(:,1:R_max) / sqrt(physical_data.Lx*physical_data.L
 full_basis_in_matrix_form = permute(reshape( ...
     full_basis_in_vector_form, [resolution, resolution, R_max]), ...
     [3, 1, 2]);
-save('full_basis_in_matrix_form', "full_basis_in_matrix_form");
+%% Save?
+save('full_100_v3_basis_in_matrix_form', "full_basis_in_matrix_form");
 %% Plot
 % We plot the first 6 basis functions
-clf
 figure;
-for i = 1:24
-    subplot(4,6,i);
-    mesh(x_values, y_values, squeeze(basis_in_matrix_form(i,:,:))');
+for i = 1:12
+    subplot(3,4,i);
+    mesh(squeeze(full_basis_in_matrix_form(i,:,:))');
     title('Basis function ' + string(i))
     xlabel('x')
     ylabel('y')
