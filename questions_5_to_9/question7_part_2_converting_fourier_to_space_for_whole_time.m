@@ -7,7 +7,6 @@ T = get_data_tensor(A_High_dim, t_High_dim, physical_data, ...
     resolution, Jumps);
 
 
-
 %% We plot to verify
 mesh(squeeze(T(60,:,:))');
 xlabel('x')

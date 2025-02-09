@@ -28,8 +28,8 @@ function plot_mesh_experiment(Lx, Ly, A_result, t_result, simulation_time_in_sec
     
     % And we graph it
     mesh(x_result_sample, y_result_sample, T_result_sample')
-    axis(axis_data)
-    title('Simulation at t=' + string(t_result(t_sample))+ 's')
+%     axis(axis_data)
+    title('Simulation at t\sim' + string(t_result(t_sample))+ 's')
     xlabel('x');
     ylabel('y');
     zlabel('T');

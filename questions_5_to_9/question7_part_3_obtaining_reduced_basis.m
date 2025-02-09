@@ -2,7 +2,7 @@
 time_samples = size(T,1);
 T_data_matrix = reshape(T, [time_samples, resolution^2])';
 disp(['N > M: ', num2str(length(T_data_matrix)>length(T_data_matrix(1,:)))])
-%% We compute scd
+% We compute scd
 [Y, Sigma, U] = svd(T_data_matrix, "econ");
 %% We plot the singular values to observe
 singular_values = diag(Sigma);
@@ -39,7 +39,7 @@ full_basis_in_matrix_form = permute(reshape( ...
     full_basis_in_vector_form, [resolution, resolution, R_max]), ...
     [3, 1, 2]);
 %% Save?
-save('full_100_v3_basis_in_matrix_form', "full_basis_in_matrix_form");
+save('final_full_800_basis_in_matrix_form', "full_basis_in_matrix_form");
 %% Plot
 % We plot the first 6 basis functions
 figure;

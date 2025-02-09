@@ -12,7 +12,7 @@ geo_data.X2 = 3*physical_data.Lx/4;
 geo_data.Y2 = physical_data.Ly/2;
 geo_data.W = 0.05;
 
-experiment_data.Initial_conditions = 'Jump'; % It has to be in ['Jump', 'Cubic', 'Zero]
+experiment_data.Initial_conditions = 'Jump'; % It has to be in ['Jump', 'Cubic', 'Zero']
 experiment_data.u_functions = 'Sines'; % It has to be in ['Sines', 'Zero']
 
 % Chosing model size 

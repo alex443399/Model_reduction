@@ -8,7 +8,7 @@ function [A_result, t_result] = run_experiment( ...
         A0 = jump_initial_conditions(K,L,physical_data.Lx,physical_data.Ly);
     elseif strcmp(experiment_data.Initial_conditions, 'Zero')
 
-        A0 = zeros(k,L);
+        A0 = zeros(K,L);
     else
         assert(False, 'Unknown initial conditions')
     end

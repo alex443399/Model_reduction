@@ -18,7 +18,9 @@ function [x_values, y_values, T] = convert_back_from_fourier_efficient( ...
         for l = 0:L
             % This is \phi_{kl} evaluated in every sample point in
             % x_values, y_values
+            
             summand = eval_basis(k, x_values, Lx)' * eval_basis(l, y_values, Ly);
+            
             % We weight it with its fourier coefficient and add it
             T = T + A(k+1,l+1) * summand;
         end
